@@ -1,17 +1,32 @@
 import React from 'react';
+import { useState } from 'react';
+import Search from '../component/search';
+import PodcastList from '../component/podcastList';
 
 const MainView = (props) => {
+  const [filter, setFilter] = useState('');
 
+  const handleSearchChange = (event) => {
+    event.preventDefault();
+    console.log(event.target.value);
+    setFilter(event.target.value);
+  };
+
+  function filterPodcasts (podcasts, filterText) {
+    const searchText = filterText.toLowerCase();
+    return podcasts.filter((podcast) => {
+      const title = podcast["im:name"].label.toLowerCase();
+      const author = podcast["im:artist"].label.toLowerCase();
+      return title.includes(searchText) || author.includes(searchText);
+    });
+  };
+  
   return (
-    <div>
-      <h1>Main View</h1>
-      {
-        props.toppodcasts.map( podcast => (
-            <div key={podcast.id.attributes["im:id"]}>
-              <h2>{podcast.title.label}</h2>
-
-            </div>
-          ))}
+    <div className='containerMainView'>
+      <Search 
+        toppodcasts={filterPodcasts(props.toppodcasts, filter)}
+        handleSearchChange={handleSearchChange}/>
+      <PodcastList toppodcasts={filterPodcasts(props.toppodcasts, filter)} />
     </div>
   );
 };

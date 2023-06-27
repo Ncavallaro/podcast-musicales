@@ -4,7 +4,7 @@ import MainView from '../src/components/views/mainView';
 import PodcastDetailsView from '../src/components/views/podcastDetailsView';
 import EpisodeDetailsView from '../src/components/views/episodeDetailsView';
 import Nav from '../src/components/header/nav';
-import useFetchToppodcasts from '../src/api/podcastsList';
+import useFetchToppodcasts from '../src/api/apiPodcastsList';
 import 'bootstrap/dist/css/bootstrap.css';
 import './App.css';
 

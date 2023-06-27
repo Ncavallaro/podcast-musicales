@@ -10,13 +10,13 @@ const Nav = (props) => {
     }
 
     return (
-        <nav class="navbar bg-body-tertiary">
-            <div class="container" id="containerNavbar">
-                <a class="navbar-brand" href="/">Podcaster</a>
+        <nav className="navbar bg-body-tertiary">
+            <div className="container" id="containerNavbar">
+                <a className="navbar-brand" href="/">Podcaster</a>
             </div>
             {isLoading() && (
-                <div class="spinner-grow text-primary" role="status">
-                    <span class="visually-hidden">Loading...</span>
+                <div className="spinner-grow text-primary" role="status">
+                    <span className="visually-hidden">Loading...</span>
                 </div>
             )}
         </nav>
