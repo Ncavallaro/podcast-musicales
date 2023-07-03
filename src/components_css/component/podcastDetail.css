@@ -1,0 +1,12 @@
+#podcastDetail .card-title{
+    font-weight: bold;
+}
+
+.card img{
+    width: 200px;
+    height: 200px;
+    margin-top: 4%;
+    margin-bottom: 4%; 
+    border-radius: 0%;
+}
+  

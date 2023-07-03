@@ -1,0 +1,16 @@
+.navbar {
+    border-bottom: 2px solid rgb(164 164 164 / 36%);
+}    
+#containerNavbar{
+    margin-left: 3%;
+}
+
+.navbar-brand{
+    font-size: 2rem !important;
+    font-weight: bold;
+    color: rgb(2 140 226) !important;
+}
+
+.spinner-grow {
+    margin-right: 3%;
+}

@@ -1,0 +1,18 @@
+#containerDetailsView{
+    display: flex;
+    margin-top: 3%;
+    margin-left: 8%;
+}
+.barraLateral{
+    margin-right: 15%;
+    width: 30%;
+}
+
+.seccionPrincipal{
+    width: 70%;
+    flex: 1;
+}
+
+#containerEpisodes{
+    max-width: 1430px !important;
+}
