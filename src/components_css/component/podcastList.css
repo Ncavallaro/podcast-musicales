@@ -1,18 +1,15 @@
 .card{
     align-items: center;
     border-color: white !important;
-    box-shadow: 3px 3px 3px 0px rgb(164 164 164 /80%), -3px 3px 3px 0px rgb(164 164 164 /80%);
+    box-shadow: 3px 3px 3px 0px rgb(164 164 164 /80%), -3px 3px 3px 0px rgb(164 164 164 /80%), 0px 1px 10px 0px rgb(164 164 164 /80%);
 }
 
-.card img{
-    width: 90px;
-    height: 90px;
-    border-radius: 50%;
+.card-img-top-borde-radius{
+    border-radius: 50% !important;
 }
 
 .card .card-body{
     width: 100%;
-    
 }
 
 #Link {

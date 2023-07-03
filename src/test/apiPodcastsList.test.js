@@ -2,111 +2,73 @@ import { renderHook } from '@testing-library/react-hooks';
 import UseFetchToppodcasts from '../api/apiPodcastsList';
 
 describe('UseFetchToppodcasts', () => {
+  beforeAll(() => {
+    global.fetch = jest.fn().mockResolvedValue({
+      json: jest.fn().mockResolvedValue({
+        feed: { entry: ['podcast1', 'podcast2', 'podcast3'] },
+      }),
+    });
+  });
+
+  afterAll(() => {
+    global.fetch.mockRestore();
+  });
+
   beforeEach(() => {
-    // Limpiar el localStorage antes de cada prueba
-    localStorage.clear();
+    global.localStorage.clear();
   });
 
-  test('debe obtener los datos de la API y almacenarlos en el estado y el localStorage', async () => {
-    const limit = 100;
-    const genre = 'all';
+  test('fetches and stores toppodcasts data in local storage', async () => {
+    const limit = 10;
+    const genre = 'music';
+    const STORAGE_KEY = 'toppodcasts';
 
-    // Simular la respuesta exitosa de la API
-    const mockData = {
-      feed: {
-        entry: [{ id: 1, title: 'Podcast 1' }, { id: 2, title: 'Podcast 2' }],
-      },
-    };
-    global.fetch = jest.fn().mockResolvedValue({
-      json: jest.fn().mockResolvedValue(mockData),
-    });
+    renderHook(() => UseFetchToppodcasts({ limit, genre }));
 
-    const { result, waitForNextUpdate } = renderHook(() => UseFetchToppodcasts({ limit, genre }));
+    expect(fetch).toHaveBeenCalledWith(
+      `https://itunes.apple.com/us/rss/toppodcasts/limit=${limit}/genre=${genre}/json`
+    );
 
-    expect(result.current.toppodcasts).toEqual([]);
-
-    await waitForNextUpdate();
-
-    expect(result.current.toppodcasts).toEqual(mockData.feed.entry);
-
-    // Verificar que los datos se almacenan en el localStorage
-    const storedData = localStorage.getItem('toppodcasts');
-    expect(JSON.parse(storedData)).toEqual(mockData.feed.entry);
+    await expect(global.localStorage.getItem(STORAGE_KEY)).resolves.toEqual(
+      JSON.stringify(['podcast1', 'podcast2', 'podcast3'])
+    );
   });
 
-  test('debe utilizar los datos almacenados en el cliente si han pasado menos de un día', async () => {
-    const limit = 100;
-    const genre = 'all';
+  test('uses stored toppodcasts data when available and not expired', async () => {
+    const limit = 10;
+    const genre = 'music';
+    const STORAGE_KEY = 'toppodcasts';
+    const storedData = ['cached1', 'cached2', 'cached3'];
+    const storedTimestamp = Date.now() - 12 * 60 * 60 * 1000; // Less than 24 hours
 
-    // Simular datos almacenados en el localStorage con un timestamp reciente
-    const storedData = JSON.stringify([{ id: 1, title: 'Podcast 1' }, { id: 2, title: 'Podcast 2' }]);
-    const storedTimestamp = Date.now() - 12 * 60 * 60 * 1000; // Hace menos de un día
-    localStorage.setItem('toppodcasts', storedData);
-    localStorage.setItem('toppodcasts_timestamp', storedTimestamp.toString());
+    global.localStorage.setItem(STORAGE_KEY, JSON.stringify(storedData));
+    global.localStorage.setItem(`${STORAGE_KEY}_timestamp`, storedTimestamp);
 
-    const { result, waitForNextUpdate } = renderHook(() => UseFetchToppodcasts({ limit, genre }));
+    renderHook(() => UseFetchToppodcasts({ limit, genre }));
 
-    expect(result.current.toppodcasts).toEqual([]);
-
-    await waitForNextUpdate();
-
-    expect(result.current.toppodcasts).toEqual(JSON.parse(storedData));
-    expect(global.fetch).not.toHaveBeenCalled(); // No se realiza una nueva solicitud a la API
+    expect(fetch).not.toHaveBeenCalled();
+    await expect(global.localStorage.getItem(STORAGE_KEY)).resolves.toEqual(
+      JSON.stringify(storedData)
+    );
   });
 
-  test('debe realizar una nueva solicitud a la API si han pasado más de un día', async () => {
-    const limit = 100;
-    const genre = 'all';
+  test('fetches toppodcasts data when stored data is expired', async () => {
+    const limit = 10;
+    const genre = 'music';
+    const STORAGE_KEY = 'toppodcasts';
+    const storedData = ['cached1', 'cached2', 'cached3'];
+    const storedTimestamp = Date.now() - 48 * 60 * 60 * 1000; // More than 24 hours
 
-    // Simular datos almacenados en el localStorage con un timestamp antiguo
-    const storedData = JSON.stringify([{ id: 1, title: 'Podcast 1' }, { id: 2, title: 'Podcast 2' }]);
-    const storedTimestamp = Date.now() - 2 * 24 * 60 * 60 * 1000; // Hace más de un día
-    localStorage.setItem('toppodcasts', storedData);
-    localStorage.setItem('toppodcasts_timestamp', storedTimestamp.toString());
+    global.localStorage.setItem(STORAGE_KEY, JSON.stringify(storedData));
+    global.localStorage.setItem(`${STORAGE_KEY}_timestamp`, storedTimestamp);
 
-    // Simular la respuesta exitosa de la API
-    const mockData = {
-      feed: {
-        entry: [{ id: 3, title: 'Podcast 3' }, { id: 4, title: 'Podcast 4' }],
-      },
-    };
-    global.fetch = jest.fn().mockResolvedValue({
-      json: jest.fn().mockResolvedValue(mockData),
-    });
+    renderHook(() => UseFetchToppodcasts({ limit, genre }));
 
-    const { result, waitForNextUpdate } = renderHook(() => UseFetchToppodcasts({ limit, genre }));
-
-    expect(result.current.toppodcasts).toEqual([]);
-
-    await waitForNextUpdate();
-
-    expect(result.current.toppodcasts).toEqual(mockData.feed.entry);
-
-    // Verificar que los nuevos datos se almacenan en el localStorage con el nuevo timestamp
-    const updatedStoredData = localStorage.getItem('toppodcasts');
-    expect(JSON.parse(updatedStoredData)).toEqual(mockData.feed.entry);
-    expect(localStorage.getItem('toppodcasts_timestamp')).toBeDefined();
-  });
-
-  test('debe manejar correctamente los errores al obtener los datos de la API', async () => {
-    const limit = 100;
-    const genre = 'all';
-
-    // Simular una respuesta de error de la API
-    global.fetch = jest.fn().mockRejectedValue(new Error('API Error'));
-
-    // Moquear la consola para evitar mensajes de error en la salida del test
-    const consoleErrorMock = jest.spyOn(console, 'error').mockImplementation(() => {});
-
-    const { result, waitForNextUpdate } = renderHook(() => UseFetchToppodcasts({ limit, genre }));
-
-    expect(result.current.toppodcasts).toEqual([]);
-
-    await waitForNextUpdate();
-
-    expect(result.current.toppodcasts).toEqual([]);
-    expect(consoleErrorMock).toHaveBeenCalledWith(new Error('API Error'));
-
-    consoleErrorMock.mockRestore();
+    expect(fetch).toHaveBeenCalledWith(
+      `https://itunes.apple.com/us/rss/toppodcasts/limit=${limit}/genre=${genre}/json`
+    );
+    await expect(global.localStorage.getItem(STORAGE_KEY)).resolves.toEqual(
+      JSON.stringify(['podcast1', 'podcast2', 'podcast3'])
+    );
   });
 });

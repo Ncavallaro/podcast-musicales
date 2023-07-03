@@ -8,7 +8,6 @@ const MainView = (props) => {
 
   const handleSearchChange = (event) => {
     event.preventDefault();
-    console.log(event.target.value);
     setFilter(event.target.value);
   };
 

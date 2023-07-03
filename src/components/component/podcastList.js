@@ -9,11 +9,11 @@ const PodcastList = (props) => {
                 <Link to={`/podcast/${podcast.id.attributes["im:id"]}`} className='col-lg-3 col-md-6 col-sm-12' id='Link' key={podcast.id.attributes["im:id"]}>
                   <div key={podcast.id.attributes["im:id"]} >
                     <div className="card mb-3">
-                        <img src={podcast["im:image"][0].label} className="card-img-top" alt={podcast["im:image"][0].attributes.height} />
+                      <img src={podcast["im:image"][0].label} className="card-img-top-borde-radius" alt={podcast["im:image"][0].attributes.height} />
                       <div className="card-body">
                         <h3 className="card-title">{podcast["im:name"].label}</h3>
                         <p className="card-text">
-                          <strong>Author:</strong> {podcast["im:artist"].label}
+                          <span >Author: {podcast["im:artist"].label}</span > 
                         </p>
                       </div>
                     </div>
